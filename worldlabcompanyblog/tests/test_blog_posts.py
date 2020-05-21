@@ -38,6 +38,20 @@ class UsersTests(unittest.TestCase):
     #### helper methods ####
     ########################
 
+    def register(self, email, username, password, pass_confirm):
+        return self.app.post(
+            '/register',
+            data=dict(email=email, username=username, password=password, pass_confirm=pass_confirm),
+            follow_redirects=True
+        )
+
+
+    def login(self, email, password):
+        return self.app.post(
+            '/login',
+            data=dict(email=email, password=password),
+            follow_redirects=True
+        )
 
 
 
@@ -45,8 +59,30 @@ class UsersTests(unittest.TestCase):
     #### tests ####
     ###############
 
+    def test_create_post_page(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/create', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Title', response.data)
+        self.assertIn(b'Text', response.data)
 
 
+    def test_create_post(self):
+        pass
+
+
+    def test_create_post_missing_title_field(self):
+        pass
+
+
+    def test_create_post_missing_text_field(self):
+        pass
+
+
+    
  
 if __name__ == "__main__":
     unittest.main()
