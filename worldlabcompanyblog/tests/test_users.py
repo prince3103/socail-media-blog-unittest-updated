@@ -4,6 +4,7 @@ import unittest
 sys.path.append(os.path.abspath(os.path.join('..', '..')))
 from worldlabcompanyblog import app, db
 from worldlabcompanyblog.models import User
+from werkzeug.datastructures import FileStorage
  
 TEST_DB = 'user.db'
  
@@ -34,8 +35,6 @@ class UsersTests(unittest.TestCase):
         pass
  
 
-
-
     ########################
     #### helper methods ####
     ########################
@@ -48,9 +47,19 @@ class UsersTests(unittest.TestCase):
         )
 
 
+    def login(self, email, password):
+        return self.app.post(
+            '/login',
+            data=dict(email=email, password=password),
+            follow_redirects=True
+        )
+
+
     ###############
     #### tests ####
     ###############
+
+#test for registration
 
     def test_user_registration_form_displays(self):
         response = self.app.get('/register')
@@ -117,6 +126,135 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'This field is required.', response.data)
 
+
+#test for login
+
+    def test_login_form_displays(self):
+        response = self.app.get('/login')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Create an Account', response.data)
+        self.assertIn(b'Log In', response.data)
+
+
+    def test_valid_login(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.assertIn(b'Log Out', response.data)
+
+
+    def test_login_without_registering(self):
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.assertIn(b'Invalid Email Address or Password', response.data)
+
+
+    def test_missing_email_field_user_login_error(self):
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('', 'FlaskIsAwesome')
+        self.assertIn(b'This field is required.', response.data)
+
+
+    def test_missing_password_field_user_login_error(self):
+        self.app.get('/login', follow_redirects=True)
+        response = self.login('patkennedy79@gmail.com', '')
+        self.assertIn(b'This field is required.', response.data)
+
+#logout
+
+    def test_valid_logout(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'You are Logged Out', response.data)
+
+
+    def test_invalid_logout_within_being_logged_in(self):
+        response = self.app.get('/logout', follow_redirects=True)
+        self.assertIn(b'Register', response.data)
+        self.assertIn(b'Log In', response.data)
+
+
+#user_accout_page
+
+    def test_user_account_after_logging_in(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Welcome to the page for prince', response.data)
+        self.assertIn(b'patkennedy79@gmail.com', response.data)
+
+
+    def test_user_account_without_logging_in(self):
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Faccount', response.data)
+
+
+
+    def test_update_profile_pic(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'samplepic', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Welcome to the page for samplepic', response.data)
+        self.assertIn(b'patkennedy79@gmail.com', response.data)
+        self.assertIn(b'src="/static/profile_pics/default_profile.jpg"', response.data)
+        current_file_path = os.path.dirname(os.path.abspath(__file__))
+        current_file_dir = os.path.dirname(current_file_path)
+        samplepic_path = os.path.join(current_file_dir, "static/profile_pics/one.png")
+
+        my_file = FileStorage(
+            stream=open(samplepic_path, "rb"),
+            filename="samplepic.png",
+            content_type="image/png",
+        )
+        response = self.app.post(
+           '/account',
+           data={
+              "picture": my_file,
+           },
+           content_type="multipart/form-data"
+        )
+
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'src="/static/profile_pics/samplepic.png"', response.data)
+
+
+    def test_update_profile_pic_wihout_login(self):
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Faccount', response.data)
+        current_file_path = os.path.dirname(os.path.abspath(__file__))
+        current_file_dir = os.path.dirname(current_file_path)
+        samplepic_path = os.path.join(current_file_dir, "static/profile_pics/one.png")
+
+        my_file = FileStorage(
+            stream=open(samplepic_path, "rb"),
+            filename="samplepic.png",
+            content_type="image/png",
+        )
+        response = self.app.post(
+           '/account',
+           data={
+              "picture": my_file,
+           },
+           content_type="multipart/form-data"
+        )
+
+        response = self.app.get('/account')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(b'You should be redirected automatically to target URL:', response.data)
+        self.assertIn(b'/login?next=%2Faccount', response.data)
 
  
 if __name__ == "__main__":

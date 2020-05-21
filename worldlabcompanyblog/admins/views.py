@@ -21,6 +21,9 @@ def admin_login():
 			return redirect("/admin")
 		else:
 			flash('Invalid Email Address or Password')
+	elif request.method == 'POST':
+	    for key in form.errors.keys():
+	        flash(form.errors[key][0])
 	return render_template('admin_login.html', form = form)
 
 
@@ -28,6 +31,6 @@ def admin_login():
 @login_required
 def admin_logout():
 	logout_user()
-	flash('You logged out!')
+	flash('You are logged out!')
 	return redirect(url_for('admins.admin_login'))
 

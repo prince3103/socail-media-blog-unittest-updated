@@ -17,7 +17,6 @@ def register():
     if form.validate_on_submit():
         check_email = form.check_email(form.email)
         check_username = form.check_username(form.username)
-
         if check_email and check_username:
             user = User(email=form.email.data,
                         username=form.username.data,
@@ -40,6 +39,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         # Grab the user from our User Models table
+        print(form.email.data)
         user = User.query.filter_by(email=form.email.data).first()
 
         # Check that the user was supplied and the password is right
@@ -65,7 +65,6 @@ def login():
         else:
             flash('Invalid Email Address or Password')
     elif request.method == 'POST':
-        validate_error=""
         for key in form.errors.keys():
             flash(form.errors[key][0])
     return render_template('login.html', form=form)
@@ -83,7 +82,6 @@ def logout():
 @users.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
-
     form = UpdateUserForm()
 
     if form.validate_on_submit():
@@ -94,9 +92,9 @@ def account():
 
         # current_user.username = form.username.data
         # current_user.email = form.email.data
-        db.session.commit()
-        flash('User Account Updated')
-        return redirect(url_for('users.account'))
+            db.session.commit()
+            flash('User Account Updated')
+            return redirect(url_for('users.account'))
 
     # elif request.method == 'GET':
     #     form.username.data = current_user.username

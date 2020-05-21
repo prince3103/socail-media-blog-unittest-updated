@@ -3,11 +3,12 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join('..', '..')))
 from worldlabcompanyblog import app, db
+from worldlabcompanyblog.models import User
  
-TEST_DB = 'test.db'
+TEST_DB = 'user.db'
  
  
-class BasicTests(unittest.TestCase):
+class UsersTests(unittest.TestCase):
  
     ############################
     #### setup and teardown ####
@@ -33,20 +34,18 @@ class BasicTests(unittest.TestCase):
         pass
  
 
-###############
-#### tests ####
-###############
- 
-    def test_main_page(self):
-        response = self.app.get('/', follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Worldlab Company Blog', response.data)
+    ########################
+    #### helper methods ####
+    ########################
 
 
-    def test_about_us_page(self):
-        response = self.app.get('/info', follow_redirects=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Info about our Company', response.data)
+
+
+    ###############
+    #### tests ####
+    ###############
+
+
 
  
 if __name__ == "__main__":

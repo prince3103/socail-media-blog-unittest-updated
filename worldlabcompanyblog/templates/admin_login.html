@@ -2,7 +2,18 @@
 {% block content %}
 <div class="login-form">
 	{% with messages = get_flashed_messages() %}
-		
+		{% if messages %}
+		    <ul class="flashes">
+		    {% for message in messages %}
+      			{% if message == 'This field is required.' %}
+		      		{{ message }}
+		      	{% endif %}
+		      	{% if message == 'You are logged out!' %}
+	              <li>{{ message }}</li>
+	            {% endif %}
+		    {% endfor %}
+		    </ul>
+		  {% endif %}
 		
 	<form method="POST">
 	    {# This hidden_tag is a CSRF security feature. #}
