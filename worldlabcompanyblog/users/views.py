@@ -29,7 +29,6 @@ def register():
     elif request.method == 'POST':
         for key in form.errors.keys():
             flash(form.errors[key][0])
-            print(form.errors[key][0])
     return render_template('register.html', form=form)
 
 @users.route('/login', methods=['GET', 'POST'])
@@ -39,7 +38,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         # Grab the user from our User Models table
-        print(form.email.data)
         user = User.query.filter_by(email=form.email.data).first()
 
         # Check that the user was supplied and the password is right

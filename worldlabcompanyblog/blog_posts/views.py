@@ -1,4 +1,4 @@
-from flask import render_template,url_for,flash, redirect,request,Blueprint
+from flask import render_template,url_for,flash, redirect,request,Blueprint, abort
 from flask_login import current_user,login_required
 from worldlabcompanyblog import db
 from worldlabcompanyblog.models import BlogPost
@@ -21,7 +21,9 @@ def create_post():
         db.session.commit()
         flash("Blog Post Created")
         return redirect(url_for('core.index'))
-
+    elif request.method == 'POST':
+        for key in form.errors.keys():
+            flash(form.errors[key][0])
     return render_template('create_post.html',form=form)
 
 

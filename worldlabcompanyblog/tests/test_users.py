@@ -55,6 +55,15 @@ class UsersTests(unittest.TestCase):
         )
 
 
+
+    def create_post(self, title, text):
+        return self.app.post(
+            '/create',
+            data = dict(title=title, text = text),
+            follow_redirects=True)
+
+
+
     ###############
     #### tests ####
     ###############
@@ -198,14 +207,11 @@ class UsersTests(unittest.TestCase):
 
 
 
-    def test_update_profile_pic(self):
+    def test_update_profile_pic_after_logging_in(self):
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'samplepic', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
         response = self.app.get('/account')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Welcome to the page for samplepic', response.data)
-        self.assertIn(b'patkennedy79@gmail.com', response.data)
         self.assertIn(b'src="/static/profile_pics/default_profile.jpg"', response.data)
         current_file_path = os.path.dirname(os.path.abspath(__file__))
         current_file_dir = os.path.dirname(current_file_path)
@@ -229,7 +235,7 @@ class UsersTests(unittest.TestCase):
         self.assertIn(b'src="/static/profile_pics/samplepic.png"', response.data)
 
 
-    def test_update_profile_pic_wihout_login(self):
+    def test_update_profile_pic_wihout_logging_in(self):
         response = self.app.get('/account')
         self.assertEqual(response.status_code, 302)
         self.assertIn(b'You should be redirected automatically to target URL:', response.data)
@@ -255,6 +261,55 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(b'You should be redirected automatically to target URL:', response.data)
         self.assertIn(b'/login?next=%2Faccount', response.data)
+
+### to be recorded in excel 21-May-2020
+    def test_user_blog_post_page_after_logging_in(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/prince')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Welcome to the page for prince', response.data)
+
+
+
+    def test_user_blog_post_page_without_logging_in(self):  #test is positive
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/logout', follow_redirects=True)
+        response = self.app.get('/prince')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Welcome to the page for prince', response.data)
+
+
+    def test_user_blog_posts_after_logging_in(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.app.get('/create', follow_redirects=True)
+        self.create_post('Hello Title', 'Hello Text')
+        response = self.app.get('/prince', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Hello Title', response.data)
+        self.assertIn(b'Hello Text', response.data)
+        self.assertIn(b'Welcome to the page for prince', response.data)
+
+
+    def test_user_blog_posts_without_logging_in(self):  #test is positive
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        self.app.get('/create', follow_redirects=True)
+        self.create_post('Hello Title', 'Hello Text')
+        self.app.get('/logout', follow_redirects=True)
+        response = self.app.get('/prince', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Hello Title', response.data)
+        self.assertIn(b'Hello Text', response.data)
+        self.assertIn(b'Welcome to the page for prince', response.data)
 
  
 if __name__ == "__main__":
