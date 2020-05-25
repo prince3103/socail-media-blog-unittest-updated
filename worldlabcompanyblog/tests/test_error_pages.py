@@ -74,8 +74,6 @@ class BasicTests(unittest.TestCase):
 #### tests ####
 ###############
 
-########----22 may to be recorded in excel sheet
-
     def test_404_page(self):
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')

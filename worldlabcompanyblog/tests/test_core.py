@@ -73,7 +73,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Worldlab Company Blog', response.data)
 
-##to be recorded in excel 21-May-2020
+
     def test_home_page_blog_posts_after_logging_in(self):
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
@@ -104,7 +104,6 @@ class BasicTests(unittest.TestCase):
         self.assertIn(b'Log In', response.data)
 
 
-### below is recorded in excel
     def test_about_us_page(self):
         response = self.app.get('/info', follow_redirects=True)
         self.assertEqual(response.status_code, 200)

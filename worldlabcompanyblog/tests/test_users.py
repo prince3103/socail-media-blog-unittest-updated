@@ -136,6 +136,17 @@ class UsersTests(unittest.TestCase):
         self.assertIn(b'This field is required.', response.data)
 
 
+    def test_logout_user_on_opening_registration_page(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/register', follow_redirects=True)
+        self.assertIn(b'Log In', response.data)
+        self.assertIn(b'Register', response.data)
+        self.assertNotIn(b'Logout', response.data)
+
+
 #test for login
 
     def test_login_form_displays(self):
@@ -169,6 +180,17 @@ class UsersTests(unittest.TestCase):
         self.app.get('/login', follow_redirects=True)
         response = self.login('patkennedy79@gmail.com', '')
         self.assertIn(b'This field is required.', response.data)
+
+
+    def test_logout_user_on_opening_login_page(self):
+        self.app.get('/register', follow_redirects=True)
+        self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
+        self.app.get('/login', follow_redirects=True)
+        self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
+        response = self.app.get('/login', follow_redirects=True)
+        self.assertIn(b'Log In', response.data)
+        self.assertNotIn(b'Logout', response.data)
+
 
 #logout
 
@@ -262,7 +284,7 @@ class UsersTests(unittest.TestCase):
         self.assertIn(b'You should be redirected automatically to target URL:', response.data)
         self.assertIn(b'/login?next=%2Faccount', response.data)
 
-### to be recorded in excel 21-May-2020
+
     def test_user_blog_post_page_after_logging_in(self):
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
@@ -273,7 +295,7 @@ class UsersTests(unittest.TestCase):
 
 
 
-    def test_user_blog_post_page_without_logging_in(self):  #test is positive
+    def test_user_blog_post_page_without_logging_in(self):
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.login('patkennedy79@gmail.com', 'FlaskIsAwesome')
@@ -297,7 +319,7 @@ class UsersTests(unittest.TestCase):
         self.assertIn(b'Welcome to the page for prince', response.data)
 
 
-    def test_user_blog_posts_without_logging_in(self):  #test is positive
+    def test_user_blog_posts_without_logging_in(self): 
         self.app.get('/register', follow_redirects=True)
         self.register('patkennedy79@gmail.com', 'prince', 'FlaskIsAwesome', 'FlaskIsAwesome')
         self.app.get('/login', follow_redirects=True)
