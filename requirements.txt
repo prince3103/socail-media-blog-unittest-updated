@@ -39,7 +39,7 @@ packaging==20.3
 passlib==1.7.2
 Pillow==7.0.0
 pluggy==0.13.1
-py==1.8.1
+py==1.10.0
 pycparser==2.18
 pyparsing==2.4.7
 pytest==5.4.1
